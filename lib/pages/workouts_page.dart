@@ -4,7 +4,6 @@ import 'workout_session_page.dart';
 class WorkoutsPage extends StatelessWidget {
   const WorkoutsPage({super.key});
 
-  // Example workout data to display.
   static const List<Map<String, dynamic>> _workouts = [
     {
       'name': 'Full Body Strength',
@@ -26,25 +25,22 @@ class WorkoutsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Workouts'),
-      ),
+      appBar: AppBar(title: const Text('My Workouts')),
       body: ListView.builder(
         itemCount: _workouts.length,
         itemBuilder: (context, index) {
           final workout = _workouts[index];
           return Card(
-            margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: ListTile(
               title: Text(workout['name']!),
               subtitle: Text(workout['description']!),
               trailing: const Icon(Icons.arrow_forward_ios),
               onTap: () {
-                // This is the key change! It navigates to the workout session page.
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => WorkoutSessionPage(
+                    builder: (_) => WorkoutSessionPage(
                       planName: workout['name']!,
                       exerciseNames: workout['exercises'] as List<String>,
                     ),

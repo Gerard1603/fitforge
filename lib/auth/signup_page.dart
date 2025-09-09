@@ -13,13 +13,11 @@ class _SignupPageState extends State<SignupPage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
-
-  bool _obscurePassword = true;
-  bool _obscureConfirm = true;
+  bool _obscure = true;
 
   void _signup() {
     if (_formKey.currentState!.validate()) {
+      // In real app → send data to backend
       Navigator.pushReplacementNamed(context, Routes.home);
     }
   }
@@ -27,146 +25,158 @@ class _SignupPageState extends State<SignupPage> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-
-    const gradient = LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: [Color(0xFFFFA726), Color(0xFFFF6F00)],
-    );
+    final text = Theme.of(context).textTheme;
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(gradient: gradient),
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
-            child: Card(
-              elevation: 10,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.person_add, size: 80, color: scheme.primary),
-                      const SizedBox(height: 16),
-                      Text("Create Account",
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          )),
-                      const SizedBox(height: 32),
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFFFFA726), Color(0xFFFF7043)],
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Icon / Logo
+                    Icon(Icons.person_add,
+                        size: 90, color: scheme.onPrimary),
+                    const SizedBox(height: 16),
 
-                      // Name
-                      TextFormField(
-                        controller: _nameController,
-                        decoration: const InputDecoration(
-                          labelText: "Full Name",
-                          prefixIcon: Icon(Icons.person),
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) return "Enter your name";
-                          return null;
-                        },
+                    // Title
+                    Text(
+                      "Create Account",
+                      style: text.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: scheme.onPrimary,
                       ),
-                      const SizedBox(height: 16),
-
-                      // Email
-                      TextFormField(
-                        controller: _emailController,
-                        decoration: const InputDecoration(
-                          labelText: "Email",
-                          prefixIcon: Icon(Icons.email),
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) return "Enter email";
-                          if (!value.contains("@")) return "Enter valid email";
-                          return null;
-                        },
+                    ),
+                    Text(
+                      "Sign up to start your fitness journey",
+                      style: text.bodyMedium?.copyWith(
+                        color: scheme.onPrimary.withOpacity(0.8),
                       ),
-                      const SizedBox(height: 16),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 32),
 
-                      // Password
-                      TextFormField(
-                        controller: _passwordController,
-                        obscureText: _obscurePassword,
-                        decoration: InputDecoration(
-                          labelText: "Password",
-                          prefixIcon: const Icon(Icons.lock),
-                          border: const OutlineInputBorder(),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                                _obscurePassword ? Icons.visibility_off : Icons.visibility),
-                            onPressed: () {
-                              setState(() => _obscurePassword = !_obscurePassword);
-                            },
+                    // Name
+                    TextFormField(
+                      controller: _nameController,
+                      style: TextStyle(color: scheme.onPrimary),
+                      decoration: _inputDecoration("Full Name", scheme),
+                      validator: (value) =>
+                      (value == null || value.trim().isEmpty)
+                          ? "Name is required"
+                          : null,
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Email
+                    TextFormField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      style: TextStyle(color: scheme.onPrimary),
+                      decoration: _inputDecoration("Email", scheme),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Email is required";
+                        }
+                        final emailRegex = RegExp(
+                            r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                        if (!emailRegex.hasMatch(value)) {
+                          return "Enter a valid email";
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Password
+                    TextFormField(
+                      controller: _passwordController,
+                      obscureText: _obscure,
+                      style: TextStyle(color: scheme.onPrimary),
+                      decoration: _inputDecoration("Password", scheme).copyWith(
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscure
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            color: scheme.onPrimary,
+                          ),
+                          onPressed: () =>
+                              setState(() => _obscure = !_obscure),
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Password is required";
+                        }
+                        if (value.length < 6) {
+                          return "Password must be at least 6 characters";
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Sign up button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _signup,
+                        style: ElevatedButton.styleFrom(
+                          padding:
+                          const EdgeInsets.symmetric(vertical: 14),
+                          backgroundColor: scheme.onPrimary,
+                          foregroundColor: scheme.primary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) return "Enter password";
-                          if (value.length < 6) return "Min 6 characters";
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Confirm Password
-                      TextFormField(
-                        controller: _confirmPasswordController,
-                        obscureText: _obscureConfirm,
-                        decoration: InputDecoration(
-                          labelText: "Confirm Password",
-                          prefixIcon: const Icon(Icons.lock_outline),
-                          border: const OutlineInputBorder(),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                                _obscureConfirm ? Icons.visibility_off : Icons.visibility),
-                            onPressed: () {
-                              setState(() => _obscureConfirm = !_obscureConfirm);
-                            },
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) return "Re-enter password";
-                          if (value != _passwordController.text) return "Passwords don't match";
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 24),
-
-                      // Signup Button
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: _signup,
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            backgroundColor: scheme.primary,
-                            foregroundColor: scheme.onPrimary,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
-                          ),
-                          child: const Text("Sign Up", style: TextStyle(fontSize: 18)),
+                        child: const Text(
+                          "Sign Up",
+                          style: TextStyle(fontSize: 18),
                         ),
                       ),
+                    ),
+                    const SizedBox(height: 16),
 
-                      const SizedBox(height: 16),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pushReplacementNamed(context, Routes.login);
-                        },
-                        child: const Text("Already have an account? Login"),
+                    // Footer
+                    TextButton(
+                      onPressed: () => Navigator.pushReplacementNamed(
+                          context, Routes.login),
+                      child: Text(
+                        "Already have an account? Login",
+                        style: TextStyle(color: scheme.onPrimary),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration(String label, ColorScheme scheme) {
+    return InputDecoration(
+      filled: true,
+      fillColor: Colors.white.withOpacity(0.2),
+      labelText: label,
+      labelStyle: TextStyle(color: scheme.onPrimary),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
       ),
     );
   }

@@ -1,142 +1,84 @@
 import 'package:flutter/material.dart';
-import '../routes.dart';
+import 'package:lottie/lottie.dart';
+import 'onboarding_features.dart';
 
 class OnboardingWelcome extends StatelessWidget {
   const OnboardingWelcome({super.key});
 
   @override
   Widget build(BuildContext context) {
-    const gradient = LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: [Color(0xFFFFA726), Color(0xFFFF6F00)],
-    );
-
-    return Scaffold(
-      body: Stack(
-        children: [
-          // Background Gradient
-          Container(decoration: const BoxDecoration(gradient: gradient)),
-
-          // Main content on top of the gradient
-          const _OnboardingContent(),
-        ],
-      ),
-    );
-  }
-}
-
-class _OnboardingContent extends StatelessWidget {
-  const _OnboardingContent();
-
-  @override
-  Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
 
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 28.0),
+    return Scaffold(
+      body: Container(
+        width: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFFFFA726), Color(0xFFFF7043)], // matches onboarding theme
+          ),
+        ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Brand Badge
-            const _BrandBadge(),
-            const SizedBox(height: 24),
-
-            // Hero Icon
-            Center(
-              child: Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: scheme.onPrimary.withOpacity(0.2),
-                ),
-                child: Icon(
-                  Icons.favorite_rounded,
-                  size: 80,
-                  color: scheme.onPrimary,
-                ),
+            // Lottie Animation
+            SizedBox(
+              height: 250,
+              child: Lottie.asset(
+                'assets/lottie/fitness.json',
+                repeat: true,
+                animate: true,
               ),
             ),
-            const SizedBox(height: 48),
+            const SizedBox(height: 20),
 
-            // Title and Description
+            // Title
             Text(
-              'Welcome to FitForge',
-              style: text.headlineMedium?.copyWith(
-                color: scheme.onPrimary,
+              "Welcome to FitForge",
+              style: text.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
+                color: scheme.onPrimary,
               ),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
+
+            // Subtitle
             Text(
-              "Your personalized fitness companion. Track progress, discover workouts, and achieve your goals with ease.",
-              style: text.bodyLarge?.copyWith(
+              "Your personal pocket trainer.\nLet’s get started on your fitness journey!",
+              style: text.bodyMedium?.copyWith(
                 color: scheme.onPrimary.withOpacity(0.9),
               ),
+              textAlign: TextAlign.center,
             ),
+            const SizedBox(height: 40),
 
-            const Spacer(),
-
-            // Next Button
-            Center(
-              child: ElevatedButton(
-                onPressed: () {
-                  // Navigate to the features screen using named routes
-                  Navigator.pushReplacementNamed(context, Routes.onboardingFeatures);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: scheme.onPrimary,
-                  foregroundColor: scheme.primary,
-                  minimumSize: const Size.fromHeight(56),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+            // Get Started Button
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => const OnboardingFeatures()),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: scheme.onPrimary,
+                foregroundColor: scheme.primary,
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('Next', style: text.titleMedium),
-                    const SizedBox(width: 8),
-                    const Icon(Icons.arrow_forward_rounded),
-                  ],
-                ),
+                elevation: 6,
+              ),
+              child: const Text(
+                "Get Started",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _BrandBadge extends StatelessWidget {
-  const _BrandBadge();
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: BoxDecoration(
-        color: scheme.onPrimary.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: scheme.onPrimary.withOpacity(0.18)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.fitness_center_rounded,
-              color: scheme.onPrimary, size: 20),
-          const SizedBox(width: 8),
-          Text('FitForge',
-              style: TextStyle(
-                color: scheme.onPrimary,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 0.8,
-              )),
-        ],
       ),
     );
   }

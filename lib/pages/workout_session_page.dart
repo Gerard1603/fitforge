@@ -27,7 +27,7 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
   void initState() {
     super.initState();
     _exercises = widget.exerciseNames.map((e) => _Exercise(name: e)).toList();
-    _startTimer(); // Call _startTimer here
+    _startTimer();
   }
 
   @override
@@ -36,7 +36,7 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
     super.dispose();
   }
 
-  void _startTimer() { // Implemented _startTimer
+  void _startTimer() {
     _running = true;
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (!mounted) return;
@@ -51,13 +51,7 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
       _timer?.cancel();
       _running = false;
     } else {
-      _running = true;
-      _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-        if (!mounted) return;
-        setState(() {
-          _elapsedSec++;
-        });
-      });
+      _startTimer();
     }
     setState(() {});
   }
@@ -82,7 +76,6 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
         _currentIndex++;
         _resetTimer();
       } else {
-        // Handle end of workout
         _finishWorkout();
       }
     });
@@ -90,7 +83,6 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
 
   void _finishWorkout() {
     _resetTimer();
-    // TODO: Implement logic to save workout data and navigate away
     Navigator.pop(context);
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Workout Complete!')),
@@ -121,15 +113,15 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Timer and Controls
+              // Timer
               Card(
                 color: scheme.surfaceVariant,
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(16),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -137,12 +129,12 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
                       const SizedBox(width: 16),
                       FloatingActionButton.small(
                         onPressed: _toggleTimer,
-                        child: Icon(_running ? Icons.pause_rounded : Icons.play_arrow_rounded),
+                        child: Icon(_running ? Icons.pause : Icons.play_arrow),
                       ),
                       const SizedBox(width: 8),
                       FloatingActionButton.small(
                         onPressed: _resetTimer,
-                        child: const Icon(Icons.replay_rounded),
+                        child: const Icon(Icons.replay),
                       ),
                     ],
                   ),
@@ -152,19 +144,17 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
 
               // Current Exercise
               Center(
-                child: Text(
-                  currentExercise.name,
-                  style: text.headlineMedium,
-                  textAlign: TextAlign.center,
-                ),
+                child: Text(currentExercise.name,
+                    style: text.headlineMedium,
+                    textAlign: TextAlign.center),
               ),
               const SizedBox(height: 16),
 
-              // Sets Input
+              // Input sets
               _SetInput(onAddSet: _addSet),
               const SizedBox(height: 16),
 
-              // List of completed sets
+              // Sets list
               Expanded(
                 child: ListView.builder(
                   itemCount: currentExercise.sets.length,
@@ -178,10 +168,10 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
                 ),
               ),
 
-              // Next Exercise Button
+              // Next Button
               ElevatedButton.icon(
                 onPressed: _nextExercise,
-                icon: const Icon(Icons.arrow_forward_rounded),
+                icon: const Icon(Icons.arrow_forward),
                 label: Text(
                   _currentIndex == _exercises.length - 1
                       ? 'Finish Workout'
@@ -200,8 +190,6 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
     );
   }
 }
-
-// Removed the separate _startTimer() function as it's now part of the state class.
 
 class _SetInput extends StatefulWidget {
   final void Function(_ExerciseSet) onAddSet;
@@ -240,10 +228,7 @@ class _SetInputState extends State<_SetInput> {
           child: TextFormField(
             controller: _weightController,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: 'Weight (kg)',
-              border: OutlineInputBorder(),
-            ),
+            decoration: const InputDecoration(labelText: 'Weight (kg)'),
           ),
         ),
         const SizedBox(width: 8),
@@ -251,10 +236,7 @@ class _SetInputState extends State<_SetInput> {
           child: TextFormField(
             controller: _repsController,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: 'Reps',
-              border: OutlineInputBorder(),
-            ),
+            decoration: const InputDecoration(labelText: 'Reps'),
           ),
         ),
         const SizedBox(width: 8),
