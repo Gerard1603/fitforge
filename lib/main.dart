@@ -14,6 +14,7 @@ import 'auth/signup_page.dart';
 
 // Pages
 import 'pages/home_page.dart';
+import 'pages/bmi_page.dart'; // ✅ Import BMI page
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -49,6 +50,9 @@ class FitForgeApp extends StatelessWidget {
 
         // Home
         Routes.home: (_) => const HomePage(),
+
+        // ✅ BMI Page
+        Routes.bmi: (_) => const BMIPage(),
       },
     );
   }
