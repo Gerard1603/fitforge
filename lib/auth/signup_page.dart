@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../routes.dart';
 
 class SignupPage extends StatefulWidget {
@@ -15,10 +16,24 @@ class _SignupPageState extends State<SignupPage> {
   final TextEditingController _passwordController = TextEditingController();
   bool _obscure = true;
 
-  void _signup() {
+  Future<void> _signup() async {
     if (_formKey.currentState!.validate()) {
-      // In real app → send data to backend
-      Navigator.pushReplacementNamed(context, Routes.home);
+      try {
+        final credential =
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+        );
+
+        // Optional: Set display name
+        await credential.user?.updateDisplayName(_nameController.text.trim());
+
+        Navigator.pushReplacementNamed(context, Routes.home);
+      } on FirebaseAuthException catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message ?? "Signup failed")),
+        );
+      }
     }
   }
 
@@ -45,12 +60,9 @@ class _SignupPageState extends State<SignupPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Icon / Logo
                     Icon(Icons.person_add,
                         size: 90, color: scheme.onPrimary),
                     const SizedBox(height: 16),
-
-                    // Title
                     Text(
                       "Create Account",
                       style: text.headlineMedium?.copyWith(

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../routes.dart';
 
 class LoginPage extends StatefulWidget {
@@ -12,9 +14,55 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscure = true;
+  bool _rememberMe = false;
 
-  void _login() {
-    Navigator.pushReplacementNamed(context, Routes.home);
+  @override
+  void initState() {
+    super.initState();
+    _loadRememberedLogin();
+  }
+
+  Future<void> _loadRememberedLogin() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedEmail = prefs.getString('email');
+    final savedPassword = prefs.getString('password');
+    final remember = prefs.getBool('rememberMe') ?? false;
+
+    if (remember && savedEmail != null && savedPassword != null) {
+      setState(() {
+        _emailController.text = savedEmail;
+        _passwordController.text = savedPassword;
+        _rememberMe = true;
+      });
+    }
+  }
+
+  Future<void> _login() async {
+    try {
+      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+
+      // Save login if "remember me" is checked
+      if (_rememberMe) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('email', _emailController.text);
+        await prefs.setString('password', _passwordController.text);
+        await prefs.setBool('rememberMe', true);
+      } else {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove('email');
+        await prefs.remove('password');
+        await prefs.setBool('rememberMe', false);
+      }
+
+      Navigator.pushReplacementNamed(context, Routes.home);
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message ?? "Login failed")),
+      );
+    }
   }
 
   @override
@@ -38,12 +86,8 @@ class _LoginPageState extends State<LoginPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Logo/Icon
-                  Icon(Icons.fitness_center,
-                      size: 90, color: scheme.onPrimary),
+                  Icon(Icons.fitness_center, size: 90, color: scheme.onPrimary),
                   const SizedBox(height: 16),
-
-                  // Title
                   Text(
                     "Welcome Back",
                     style: text.headlineMedium?.copyWith(
@@ -100,7 +144,26 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 8),
+
+                  // Remember me checkbox
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: _rememberMe,
+                        activeColor: scheme.onPrimary,
+                        checkColor: scheme.primary,
+                        onChanged: (value) {
+                          setState(() {
+                            _rememberMe = value ?? false;
+                          });
+                        },
+                      ),
+                      Text("Remember me",
+                          style: TextStyle(color: scheme.onPrimary)),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
 
                   // Login button
                   SizedBox(
@@ -115,10 +178,8 @@ class _LoginPageState extends State<LoginPage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text(
-                        "Login",
-                        style: TextStyle(fontSize: 18),
-                      ),
+                      child: const Text("Login",
+                          style: TextStyle(fontSize: 18)),
                     ),
                   ),
                   const SizedBox(height: 16),

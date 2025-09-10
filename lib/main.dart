@@ -1,4 +1,6 @@
+import 'package:fitforge_onboarding_professional/firebase_options.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'routes.dart';
 
 // Onboarding
@@ -17,8 +19,13 @@ import 'pages/nutrition_page.dart';
 import 'pages/profile_page.dart';
 import 'pages/settings_page.dart';
 import 'pages/workouts_page.dart';
+import 'pages/workout_session_page.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+      options: DefaultFirebaseOptions
+          .currentPlatform); // 🔥 must have firebase_options if generated
   runApp(const FitForgeApp());
 }
 
@@ -38,51 +45,8 @@ class FitForgeApp extends StatelessWidget {
           seedColor: seed,
           brightness: Brightness.light,
         ),
-
-        cardColor: Colors.white,
-        shadowColor: Colors.black.withOpacity(0.08),
-
-        appBarTheme: const AppBarTheme(
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-          foregroundColor: Colors.black,
-          centerTitle: true,
-        ),
-
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(12)),
-            ),
-            textStyle: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-
-        inputDecorationTheme: InputDecorationTheme(
-          filled: true,
-          fillColor: Colors.grey.shade100,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 12,
-          ),
-        ),
-
-        pageTransitionsTheme: const PageTransitionsTheme(
-          builders: {
-            TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
-            TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-          },
-        ),
       ),
-      initialRoute: Routes.onboardingWelcome,
+      initialRoute: Routes.login, // Start at login
       routes: {
         // Onboarding
         Routes.onboardingWelcome: (_) => const OnboardingWelcome(),
@@ -93,7 +57,7 @@ class FitForgeApp extends StatelessWidget {
         Routes.login: (_) => const LoginPage(),
         Routes.signup: (_) => const SignupPage(),
 
-        // Pages
+        // Main Pages
         Routes.home: (_) => const HomePage(),
         Routes.progress: (_) => const ProgressPage(),
         Routes.nutrition: (_) => const NutritionPage(),
@@ -102,6 +66,10 @@ class FitForgeApp extends StatelessWidget {
 
         // Workouts
         Routes.workouts: (_) => const WorkoutsPage(),
+        Routes.workoutSession: (_) => const WorkoutSessionPage(
+              planName: "Sample Plan",
+              exerciseNames: ["Push Ups", "Squats", "Sit Ups"],
+            ),
       },
     );
   }

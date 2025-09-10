@@ -1,3 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:fitforge_onboarding_professional/onboarding/onboarding_welcome.dart';
 import 'package:flutter/material.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -14,6 +17,8 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+
+    final FirebaseAuth Gauth = FirebaseAuth.instance;
 
     return Scaffold(
       appBar: AppBar(
@@ -89,7 +94,14 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               onTap: () {
                 // TODO: Implement sign out logic
-                debugPrint('Signing out...');
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => OnboardingWelcome(),
+                    ),
+                    (route) => false);
+                Gauth.signOut();
+                debugPrint('User signed out');
               },
             ),
           ],
