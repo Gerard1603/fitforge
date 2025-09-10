@@ -28,16 +28,16 @@ class _BMIPageState extends State<BMIPage> {
       String tip;
       if (bmi < 18.5) {
         result = "Underweight";
-        tip = "Consider a balanced diet with more calories.";
+        tip = "Add calorie-rich meals and strength training.";
       } else if (bmi < 24.9) {
         result = "Normal";
-        tip = "Great job! Keep maintaining your healthy lifestyle.";
+        tip = "Keep up the good work with balanced meals & activity.";
       } else if (bmi < 29.9) {
         result = "Overweight";
-        tip = "Try regular exercise and balanced nutrition.";
+        tip = "Focus on portion control and consistent workouts.";
       } else {
         result = "Obese";
-        tip = "Seek guidance from a healthcare professional.";
+        tip = "Seek professional health guidance and active lifestyle.";
       }
 
       setState(() {
@@ -46,14 +46,13 @@ class _BMIPageState extends State<BMIPage> {
         _tip = tip;
       });
 
-      // ✅ Save last BMI to SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       await prefs.setDouble('last_bmi', bmi);
       await prefs.setString('last_bmi_result', result);
     } else {
       setState(() {
         _bmi = null;
-        _result = "Enter valid values!";
+        _result = "Please enter valid values.";
         _tip = "";
       });
     }
@@ -77,6 +76,77 @@ class _BMIPageState extends State<BMIPage> {
     return Colors.red;
   }
 
+  /// ✅ Modern BMI Scale with Arrow Marker
+  Widget _buildBMIChart() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+                flex: 185, child: Container(height: 20, color: Colors.orange)),
+            Expanded(
+                flex: 64, child: Container(height: 20, color: Colors.green)),
+            Expanded(
+                flex: 50,
+                child: Container(height: 20, color: Colors.yellow.shade700)),
+            Expanded(
+                flex: 101, child: Container(height: 20, color: Colors.red)),
+          ],
+        ),
+        const SizedBox(height: 8),
+        if (_bmi != null)
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final clamped = _bmi!.clamp(10, 40);
+              final relative = (clamped - 10) / 30;
+              final pos = constraints.maxWidth * relative;
+
+              return Padding(
+                padding: EdgeInsets.only(left: pos - 20),
+                child: Column(
+                  children: [
+                    const Icon(Icons.arrow_drop_down,
+                        size: 32, color: Colors.black),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            _getBMIColor(),
+                            _getBMIColor().withOpacity(0.7)
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        _bmi!.toStringAsFixed(1),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        const SizedBox(height: 4),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: const [
+            Text("10"),
+            Text("20"),
+            Text("30"),
+            Text("40"),
+          ],
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
@@ -86,33 +156,32 @@ class _BMIPageState extends State<BMIPage> {
       appBar: AppBar(
         title: const Text("BMI Calculator"),
         backgroundColor: scheme.primary,
+        elevation: 2,
       ),
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(24),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 400),
+            constraints: const BoxConstraints(maxWidth: 420),
             child: Column(
               children: [
-                // Icon header
-                Icon(Icons.monitor_weight, size: 100, color: scheme.primary),
+                Icon(Icons.health_and_safety, size: 90, color: scheme.primary),
                 const SizedBox(height: 16),
-
                 Text(
                   "Body Mass Index",
                   style: text.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
+                    color: scheme.primary,
                   ),
                 ),
+                const SizedBox(height: 6),
                 Text(
-                  "Calculate your BMI to understand your health status",
+                  "Track your BMI to stay on top of your fitness goals",
                   style:
                       text.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 32),
-
-                // Input Fields
+                const SizedBox(height: 28),
                 TextField(
                   controller: _heightController,
                   keyboardType: TextInputType.number,
@@ -137,13 +206,13 @@ class _BMIPageState extends State<BMIPage> {
                   ),
                 ),
                 const SizedBox(height: 24),
-
-                // Action buttons
                 Row(
                   children: [
                     Expanded(
-                      child: ElevatedButton(
+                      child: ElevatedButton.icon(
                         onPressed: _calculateBMI,
+                        icon: const Icon(Icons.calculate),
+                        label: const Text("Calculate"),
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           backgroundColor: scheme.primary,
@@ -152,8 +221,6 @@ class _BMIPageState extends State<BMIPage> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: const Text("Calculate",
-                            style: TextStyle(fontSize: 18)),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -165,46 +232,51 @@ class _BMIPageState extends State<BMIPage> {
                     )
                   ],
                 ),
-                const SizedBox(height: 32),
-
-                // Result Section
+                const SizedBox(height: 28),
                 if (_bmi != null)
-                  Card(
-                    color: _getBMIColor().withOpacity(0.15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    elevation: 4,
-                    child: Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Column(
-                        children: [
-                          Text(
-                            _bmi!.toStringAsFixed(1),
-                            style: text.displaySmall?.copyWith(
-                              color: _getBMIColor(),
-                              fontWeight: FontWeight.bold,
+                  Column(
+                    children: [
+                      Card(
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16)),
+                        child: Container(
+                          padding: const EdgeInsets.all(20),
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            gradient: LinearGradient(
+                              colors: [
+                                _getBMIColor().withOpacity(0.85),
+                                _getBMIColor().withOpacity(0.65)
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
                             ),
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            _result,
-                            style: text.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: _getBMIColor(),
-                            ),
+                          child: Column(
+                            children: [
+                              Text(
+                                _result,
+                                style: text.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                _tip,
+                                style: text.bodyMedium
+                                    ?.copyWith(color: Colors.white70),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 12),
-                          Text(
-                            _tip,
-                            style: text.bodyMedium?.copyWith(
-                              color: scheme.onSurfaceVariant,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 24),
+                      _buildBMIChart(),
+                    ],
                   )
                 else if (_result.isNotEmpty)
                   Text(
