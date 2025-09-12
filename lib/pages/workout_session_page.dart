@@ -1,100 +1,77 @@
 import 'package:flutter/material.dart';
 
-class WorkoutSessionPage extends StatefulWidget {
-  final Map<String, dynamic> exercise;
-  const WorkoutSessionPage({super.key, required this.exercise});
+class WorkoutSessionPage extends StatelessWidget {
+  final String title;
 
-  @override
-  State<WorkoutSessionPage> createState() => _WorkoutSessionPageState();
-}
+  const WorkoutSessionPage({super.key, required this.title});
 
-class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
-  int completedSets = 0;
+  final List<Map<String, dynamic>> exercises = const [
+    {
+      "name": "Push Ups",
+      "sets": "3 sets x 12 reps",
+      "icon": Icons.accessibility_new,
+    },
+    {
+      "name": "Squats",
+      "sets": "4 sets x 15 reps",
+      "icon": Icons.fitness_center,
+    },
+    {
+      "name": "Plank",
+      "sets": "3 sets x 60s hold",
+      "icon": Icons.sports_gymnastics,
+    },
+    {
+      "name": "Jumping Jacks",
+      "sets": "3 sets x 30 reps",
+      "icon": Icons.directions_run,
+    },
+    {
+      "name": "Bicep Curls",
+      "sets": "3 sets x 10 reps",
+      "icon": Icons.sports,
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final ex = widget.exercise;
+    final text = Theme.of(context).textTheme;
+    final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(ex["name"] as String),
-        centerTitle: true,
-        elevation: 2,
+        title: Text(title),
+        elevation: 0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: CircleAvatar(
-                radius: 50,
-                backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                child: Icon(ex["icon"] as IconData,
-                    size: 50, color: Theme.of(context).colorScheme.primary),
+      body: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: exercises.length,
+        itemBuilder: (context, index) {
+          final exercise = exercises[index];
+          return Card(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            elevation: 2,
+            margin: const EdgeInsets.symmetric(vertical: 8),
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundColor: scheme.primaryContainer,
+                child: Icon(exercise["icon"], color: scheme.primary),
               ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              ex["name"] as String,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
+              title: Text(
+                exercise["name"],
+                style: text.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
+              subtitle: Text(exercise["sets"]),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () {
+                // Later: Navigate to detailed exercise tutorial/video page
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Selected: ${exercise["name"]}")),
+                );
+              },
             ),
-            const SizedBox(height: 8),
-            Text(
-              ex["description"] as String,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey.shade600,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              "Sets: ${ex["sets"]}",
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-            ),
-            const SizedBox(height: 30),
-
-            // Progress tracker
-            LinearProgressIndicator(
-              value: completedSets / 3,
-              minHeight: 12,
-              backgroundColor: Colors.grey.shade300,
-              color: Theme.of(context).colorScheme.primary,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            const SizedBox(height: 16),
-            Text("Completed: $completedSets/3 sets",
-                style: const TextStyle(fontSize: 16)),
-
-            const Spacer(),
-
-            // Complete Set button
-            Center(
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  setState(() {
-                    if (completedSets < 3) {
-                      completedSets++;
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("${ex["name"]} session finished! ✅")),
-                      );
-                    }
-                  });
-                },
-                icon: const Icon(Icons.check_circle),
-                label: const Text("Complete Set"),
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50),
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Colors.white,
-                  textStyle: const TextStyle(fontSize: 18),
-                ),
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

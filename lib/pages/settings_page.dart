@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:fitforge_onboarding_professional/onboarding/onboarding_welcome.dart';
 import 'package:flutter/material.dart';
 
@@ -14,11 +13,12 @@ class _SettingsPageState extends State<SettingsPage> {
   bool _workoutRemindersEnabled = true;
   String _selectedUnit = 'Metric';
 
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-
-    final FirebaseAuth Gauth = FirebaseAuth.instance;
+    final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -26,83 +26,106 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+          padding: const EdgeInsets.all(16),
           children: [
-            // Account section
-            ListTile(
-              leading: Icon(Icons.person, color: scheme.primary),
-              title: const Text('Account'),
-              subtitle: const Text('Profile, privacy, security'),
-              onTap: () {
-                // TODO: Implement navigation to account settings page
-                debugPrint('Navigating to Account Settings');
-              },
-            ),
-            const Divider(height: 1),
-
-            // Reminders switch
-            SwitchListTile(
-              title: const Text('Workout reminders'),
-              subtitle: const Text('Daily at 7:00 AM'),
-              value: _workoutRemindersEnabled,
-              onChanged: (bool value) {
-                setState(() {
-                  _workoutRemindersEnabled = value;
-                });
-                // TODO: Implement logic to enable/disable reminders
-              },
-              secondary: Icon(
-                  _workoutRemindersEnabled
-                      ? Icons.notifications_active
-                      : Icons.notifications_off,
-                  color: scheme.primary),
-            ),
-            const Divider(height: 1),
-
-            // Units selection
-            ListTile(
-              leading: Icon(Icons.straighten, color: scheme.primary),
-              title: const Text('Units'),
-              subtitle: Text(_selectedUnit),
-              onTap: () {
-                _showUnitSelectionDialog(context);
-              },
-            ),
-            const Divider(height: 1),
-
-            // About section
-            ListTile(
-              leading: Icon(Icons.info, color: scheme.primary),
-              title: const Text('About'),
-              subtitle: const Text('Version, licenses'),
-              onTap: () {
-                showAboutDialog(
-                  context: context,
-                  applicationName: 'FitForge',
-                  applicationVersion: '1.0.0',
-                );
-              },
-            ),
-            const Divider(height: 1),
-
-            // Sign out button
-            ListTile(
-              leading: Icon(Icons.logout, color: scheme.error),
-              title: Text(
-                'Sign Out',
-                style: TextStyle(color: scheme.error),
+            // Section: Account
+            Text("Account", style: textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Card(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              child: Column(
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.person),
+                    title: const Text('Account Settings'),
+                    subtitle: const Text('Profile, privacy & security'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      debugPrint("Navigate to Account Settings");
+                    },
+                  ),
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: const Icon(Icons.logout, color: Colors.red),
+                    title: const Text('Sign Out', style: TextStyle(color: Colors.red)),
+                    onTap: () {
+                      _auth.signOut();
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (_) => const OnboardingWelcome()),
+                            (route) => false,
+                      );
+                      debugPrint('User signed out');
+                    },
+                  ),
+                ],
               ),
-              onTap: () {
-                // TODO: Implement sign out logic
-                Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => OnboardingWelcome(),
-                    ),
-                    (route) => false);
-                Gauth.signOut();
-                debugPrint('User signed out');
-              },
+            ),
+
+            const SizedBox(height: 24),
+
+            // Section: Preferences
+            Text("Preferences", style: textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Card(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              child: Column(
+                children: [
+                  SwitchListTile(
+                    secondary: const Icon(Icons.notifications_active),
+                    title: const Text('Workout Reminders'),
+                    subtitle: const Text('Daily at 7:00 AM'),
+                    value: _workoutRemindersEnabled,
+                    onChanged: (val) {
+                      setState(() => _workoutRemindersEnabled = val);
+                      // Add reminder logic here
+                    },
+                  ),
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: const Icon(Icons.straighten),
+                    title: const Text('Units'),
+                    subtitle: Text(_selectedUnit),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => _showUnitSelectionDialog(context),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Section: Support
+            Text("Support", style: textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Card(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              child: Column(
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.help_outline),
+                    title: const Text('Help & FAQ'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      debugPrint("Navigate to Help Page");
+                    },
+                  ),
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: const Icon(Icons.info_outline),
+                    title: const Text('About FitForge'),
+                    subtitle: const Text('Version 1.0.0'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      showAboutDialog(
+                        context: context,
+                        applicationName: 'FitForge',
+                        applicationVersion: '1.0.0',
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -115,6 +138,7 @@ class _SettingsPageState extends State<SettingsPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: const Text('Select Units'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -123,11 +147,9 @@ class _SettingsPageState extends State<SettingsPage> {
                 title: const Text('Metric (kg, cm)'),
                 value: 'Metric',
                 groupValue: _selectedUnit,
-                onChanged: (String? value) {
+                onChanged: (value) {
                   if (value != null) {
-                    setState(() {
-                      _selectedUnit = value;
-                    });
+                    setState(() => _selectedUnit = value);
                     Navigator.pop(context);
                   }
                 },
@@ -136,11 +158,9 @@ class _SettingsPageState extends State<SettingsPage> {
                 title: const Text('Imperial (lb, in)'),
                 value: 'Imperial',
                 groupValue: _selectedUnit,
-                onChanged: (String? value) {
+                onChanged: (value) {
                   if (value != null) {
-                    setState(() {
-                      _selectedUnit = value;
-                    });
+                    setState(() => _selectedUnit = value);
                     Navigator.pop(context);
                   }
                 },
